@@ -1,0 +1,11 @@
+CONSOLE_ENABLE = no
+GRAVE_ESC_ENABLE = no
+LTO_ENABLE = yes
+MAGIC_ENABLE = no
+OLED_ENABLE = yes
+PS2_DRIVER = interrupt
+PS2_ENABLE = yes
+PS2_MOUSE_ENABLE = yes
+RGBLIGHT_ENABLE = no
+SPACE_CADET_ENABLE = no
+USER_NAME := manna-harbour_miryoku

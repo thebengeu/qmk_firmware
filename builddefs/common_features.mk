@@ -834,6 +834,7 @@ ifeq ($(strip $(PS2_MOUSE_ENABLE)), yes)
     PS2_ENABLE := yes
     MOUSE_ENABLE := yes
     SRC += ps2_mouse.c
+    SRC += $(QUANTUM_DIR)/pointing_device/pointing_device_auto_mouse.c
     OPT_DEFS += -DPS2_MOUSE_ENABLE
 endif
 

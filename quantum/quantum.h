@@ -207,6 +207,8 @@ extern layer_state_t layer_state;
 
 #ifdef POINTING_DEVICE_ENABLE
 #    include "pointing_device.h"
+#elif defined(POINTING_DEVICE_AUTO_MOUSE_ENABLE)
+#    include "pointing_device/pointing_device_auto_mouse.h"
 #endif
 
 #ifdef CAPS_WORD_ENABLE
