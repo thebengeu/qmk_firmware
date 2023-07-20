@@ -330,7 +330,7 @@ void register_mouse(uint8_t mouse_keycode, bool pressed) {
     switch (mouse_keycode) {
 #    if defined(PS2_MOUSE_ENABLE) || defined(POINTING_DEVICE_ENABLE)
 #    ifdef MIRYOKU_KLUDGE_THUMBCOMBOS
-        case KC_MS_BTN3 ... KC_MS_BTN8:
+        case KC_MS_BTN4 ... KC_MS_BTN8:
 #    else
         case KC_MS_BTN1 ... KC_MS_BTN8:
 #    endif
