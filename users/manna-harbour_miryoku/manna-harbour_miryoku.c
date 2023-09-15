@@ -98,8 +98,6 @@ bool caps_word_press_user(uint16_t keycode) {
             return true;
 
         // Keycodes that deactivate Caps Word.
-        case KC_ENT:
-        case KC_ESC:
         case KC_SPC:
             return false;
 
