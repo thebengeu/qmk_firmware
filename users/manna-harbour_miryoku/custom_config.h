@@ -6,6 +6,7 @@
 #pragma once
 
 #define PERMISSIVE_HOLD
+#define TAPPING_TERM 200
 
 #define MIRYOKU_LAYERMAPPING_AUTO_MOUSE MIRYOKU_MAPPING
 
@@ -47,9 +48,9 @@ U_NA,              KC_ALGR,           TD(U_TD_U_MOUSE),  TD(U_TD_U_SYM),    U_NA
 U_NP,              U_NP,              U_NA,              U_NA,              U_NA,              KC_UNDS,           KC_LPRN,           KC_RPRN,           U_NP,              U_NP
 
 #define MIRYOKU_LAYER_FUN \
-TD(U_TD_BOOT),     TD(U_TD_U_TAP),    TD(U_TD_U_EXTRA),  TD(U_TD_U_BASE),   U_NA,              KC_PSCR,           KC_F1,             KC_F2,             KC_F3,             KC_F10,            \
-KC_LGUI,           KC_LALT,           KC_LCTL,           KC_LSFT,           U_NA,              KC_SCRL,           KC_F4,             KC_F5,             KC_F6,             KC_F11,            \
-U_NA,              KC_ALGR,           TD(U_TD_U_MEDIA),  TD(U_TD_U_FUN),    U_NA,              KC_PAUS,           KC_F7,             KC_F8,             KC_F9,             KC_F12,            \
+TD(U_TD_BOOT),     TD(U_TD_U_TAP),    TD(U_TD_U_EXTRA),  TD(U_TD_U_BASE),   DT_UP,             KC_PSCR,           KC_F1,             KC_F2,             KC_F3,             KC_F10,            \
+KC_LGUI,           KC_LALT,           KC_LCTL,           KC_LSFT,           DT_PRNT,           KC_SCRL,           KC_F4,             KC_F5,             KC_F6,             KC_F11,            \
+U_NA,              KC_ALGR,           TD(U_TD_U_MEDIA),  TD(U_TD_U_FUN),    DT_DOWN,           KC_PAUS,           KC_F7,             KC_F8,             KC_F9,             KC_F12,            \
 U_NP,              U_NP,              U_NA,              U_NA,              U_NA,              KC_TAB,            KC_SPC,            KC_APP,            U_NP,              U_NP
 
 #define MIRYOKU_LAYER_AUTO_MOUSE \
