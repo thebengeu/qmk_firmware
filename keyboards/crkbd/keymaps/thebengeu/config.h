@@ -21,7 +21,7 @@ XXX,  K20,  K21,  K22,  K23,  K24,         K25,  K26,  K27,  K28,  K29,  XXX , \
 )
 
 #define AUTO_MOUSE_DEFAULT_LAYER 10
-#define MASTER_RIGHT
+#define EE_HANDS
 #define NO_ACTION_ONESHOT
 // #define POINTING_DEVICE_AUTO_MOUSE_ENABLE
 #define PS2_CLOCK_PIN D3
