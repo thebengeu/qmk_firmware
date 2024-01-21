@@ -1,0 +1,28 @@
+{
+  "keyboard_name": "CornePLUS by XCMKB Version 0.4",
+  "build": {
+    "lto": false
+  },
+  "encoder": {
+    "rotary": [
+      {
+        "pin_a": "B2",
+        "pin_b": "B6",
+        "resolution": 2
+      }
+    ]
+  },
+  "split": {
+    "encoder": {
+      "right": {
+        "rotary": [
+          {
+            "pin_a": "B2",
+            "pin_b": "B6",
+            "resolution": 2
+          }
+        ]
+      }
+    }
+  }
+}
