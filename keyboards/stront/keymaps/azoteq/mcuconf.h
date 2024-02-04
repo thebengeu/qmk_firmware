@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <stdbool.h>
+#include_next <mcuconf.h>
 
-bool is_display_enabled(void);
-bool is_display_side(void);
+#undef RP_I2C_USE_I2C1
+#define RP_I2C_USE_I2C1 TRUE
