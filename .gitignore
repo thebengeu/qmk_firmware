@@ -37,6 +37,7 @@ quantum/version.h
 
 # DD config at wrong location
 /keyboards/**/keymaps/*/info.json
+/keyboards/**/keymaps/*/keyboard.json
 
 # Old-style QMK Makefiles
 /keyboards/**/Makefile
@@ -78,9 +79,9 @@ tags
 *.bmp
 *.wbmp
 *.gif
-*.jpg
-*.jpeg
-*.png
+#*.jpg
+#*.png
+#*.jpeg
 *.apng
 *.mng
 *.svg
@@ -113,6 +114,9 @@ compile_commands.json
 .clangd/
 .cache/
 
-# VIA(L) files that don't belong in QMK repo
-via*.json
-/keyboards/**/keymaps/vial/*
+# VIA(L) json files that don't belong in QMK repo
+# via*.json
+# /keyboards/**/keymaps/vial/*
+
+# Sadek additions
+.vscode/settings.json

@@ -157,7 +157,7 @@ bool process_rgb(const uint16_t keycode, const keyrecord_t *record) {
                 handleKeycodeRGB(shifted, rgb_matrix_decrease_speed, rgb_matrix_increase_speed);
 #endif
                 return false;
-            case RGB_MODE_PLAIN:
+	    case RGB_MODE_PLAIN:
 #if defined(RGBLIGHT_ENABLE) && !defined(RGBLIGHT_DISABLE_KEYCODES)
                 rgblight_mode(RGBLIGHT_MODE_STATIC_LIGHT);
 #endif

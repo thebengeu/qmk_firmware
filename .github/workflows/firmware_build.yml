@@ -1,0 +1,70 @@
+name: Build QMK firmware
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+      - 'develop**'
+      - github-actions-build
+jobs:
+  gather-keyboards:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        repository: ${{ github.repository}}
+        ref: ${{ github.ref }}
+    - id: set-matrix
+      run: |
+          content=$(bash bin/fp_build.sh -l | sed s~keyboards/fingerpunch/~~|  jq -Rsc '. / "\n" - [""]')
+          content="{\"keyboard\":$content}"
+          echo "::set-output name=matrix::$content"
+
+  Build:
+    needs: gather-keyboards
+    runs-on: ubuntu-latest
+    container: qmkfm/qmk_cli
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.gather-keyboards.outputs.matrix)}}
+    steps:
+      - name: Checkout QMK
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.repository}}
+          ref: ${{ github.ref }}
+          submodules: recursive
+
+      - name: Build firmware
+        shell: bash
+        run: |
+          wget -q https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O jq
+          chmod +x jq
+          mv jq /usr/local/sbin/
+
+          keyboards=$(bash bin/fp_build.sh -l| sed s~keyboards/fingerpunch/~~)
+
+          echo "${keyboards}" | while IFS= read -r line ; do
+            case "$line" in
+              *${{ matrix.keyboard }}*)
+                echo "Building for ${line}"
+                make_command="bin/fp_build.sh -k ${line} -r"
+                echo "${make_command}"
+                $make_command
+              ;;
+            esac
+          done
+
+      - name: Archive firmware
+        uses: actions/upload-artifact@v3
+        continue-on-error: true
+        with:
+          name: qmk_fingerpunch_${{ github.actor }}
+          path: |
+            *.hex
+            *.bin
+            *.uf2
+
