@@ -26,6 +26,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "debug.h"
 #include "ps2.h"
 
+#ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
+#    include "pointing_device/pointing_device_auto_mouse.h"
+#endif
+
 /* ============================= MACROS ============================ */
 
 static report_mouse_t mouse_report = {};
@@ -97,7 +101,7 @@ void ps2_mouse_task(void) {
         mouse_report.x       = ps2_host_recv_response();
         mouse_report.y       = ps2_host_recv_response();
 #    ifdef PS2_MOUSE_ENABLE_SCROLLING
-        mouse_report.v       = -(ps2_host_recv_response() & PS2_MOUSE_SCROLL_MASK);
+        mouse_report.v = -(ps2_host_recv_response() & PS2_MOUSE_SCROLL_MASK);
 #    endif
     } else {
         if (debug_mouse) print("ps2_mouse: fail to get mouse packet\n");
@@ -127,6 +131,11 @@ void ps2_mouse_task(void) {
 #endif
         host_mouse_send(&mouse_report);
     }
+
+    // automatic mouse layer function
+#ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
+    pointing_device_task_auto_mouse(mouse_report);
+#endif
 
     ps2_mouse_clear_report(&mouse_report);
 }

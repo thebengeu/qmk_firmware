@@ -52,6 +52,10 @@
 #    include "process_midi.h"
 #endif
 
+#ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
+#    include "pointing_device/pointing_device_auto_mouse.h"
+#endif
+
 #ifdef PROGRAMMABLE_BUTTON_ENABLE
 #    include "process_programmable_button.h"
 #endif
@@ -321,7 +325,7 @@ bool process_record_quantum(keyrecord_t *record) {
 #if defined(VIA_ENABLE)
             process_record_via(keycode, record) &&
 #endif
-#if defined(POINTING_DEVICE_ENABLE) && defined(POINTING_DEVICE_AUTO_MOUSE_ENABLE)
+#if defined(POINTING_DEVICE_AUTO_MOUSE_ENABLE)
             process_auto_mouse(keycode, record) &&
 #endif
             process_record_kb(keycode, record) &&
