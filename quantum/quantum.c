@@ -56,6 +56,10 @@
 #    include "process_default_layer.h"
 #endif
 
+#ifdef POINTING_DEVICE_AUTO_MOUSE_ENABLE
+#    include "pointing_device/pointing_device_auto_mouse.h"
+#endif
+
 #ifdef PROGRAMMABLE_BUTTON_ENABLE
 #    include "process_programmable_button.h"
 #endif
@@ -350,7 +354,7 @@ bool process_record_quantum(keyrecord_t *record) {
 #ifdef HAPTIC_ENABLE
             process_haptic(keycode, record) &&
 #endif
-#if defined(POINTING_DEVICE_ENABLE) && defined(POINTING_DEVICE_AUTO_MOUSE_ENABLE)
+#if defined(POINTING_DEVICE_AUTO_MOUSE_ENABLE)
             process_auto_mouse(keycode, record) &&
 #endif
             process_record_modules(keycode, record) && // modules must run before kb
