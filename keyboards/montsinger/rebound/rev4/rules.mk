@@ -12,9 +12,6 @@ RGBLIGHT_ENABLE = no        # Enable keyboard RGB underglow
 AUDIO_ENABLE = no           # Audio output
 ENCODER_ENABLE = yes
 
-LAYOUTS_HAS_RGB = no
-
 # Disable unsupported hardware
-RGBLIGHT_SUPPORTED = yes
 AUDIO_SUPPORTED = no
 BACKLIGHT_SUPPORTED = no
