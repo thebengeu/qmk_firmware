@@ -5,7 +5,7 @@ permissions:
 
 on:
   push:
-    branches: [feature/zzeneg, feature/zzeneg-develop, stront]
+    branches: [feature/zzeneg, feature/zzeneg-develop]
     paths-ignore:
       - "**.md"
   workflow_dispatch:
@@ -13,31 +13,17 @@ on:
       branch:
         type: choice
         description: Branch to build
-        options: [feature/zzeneg, feature/zzeneg-develop, stront]
+        options: [feature/zzeneg, feature/zzeneg-develop]
 
 concurrency: ci_build-${{ github.event.inputs.branch || github.ref_name }}
 
 jobs:
-  branch_name:
-    name: Get branch name
-    runs-on: ubuntu-latest
-    outputs:
-      value: ${{ steps.clean_branch.outputs.value }}
-    steps:
-      - name: Clean branch name
-        id: clean_branch
-        run: echo value=${{ github.event.inputs.branch || github.ref_name }} | tr "[:upper:]" "[:lower:]" | sed -e 's|feature/||g' >> "$GITHUB_OUTPUT"
-
   ci_builds:
     name: Build zzeneg keyboards
-    needs:
-      - branch_name
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
-      matrix:
-        keymap: [default, hid]
 
     container: ghcr.io/qmk/qmk_cli
 
@@ -53,10 +39,10 @@ jobs:
       - name: Install dependencies
         run: pip3 install -r requirements.txt
 
-      - name: Run `qmk mass-compile` (keymap ${{ matrix.keymap }})
+      - name: Run `qmk mass-compile`
         run: |
           export NCPUS=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || getconf _NPROCESSORS_ONLN 2>/dev/null)
-          qmk mass-compile -f maintainer=zzeneg -t -j $NCPUS -km ${{ matrix.keymap }} -e DUMP_CI_METADATA=yes || touch .failed
+          qmk mass-compile -f maintainer=zzeneg -km all -t -j $NCPUS -e DUMP_CI_METADATA=yes || touch .failed
           # Generate the step summary markdown
           ./util/ci/generate_failure_markdown.sh > $GITHUB_STEP_SUMMARY || true
           # Truncate to a maximum of 1MB to deal with GitHub workflow limit
@@ -68,37 +54,10 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: artifacts-${{ needs.branch_name.outputs.value }}-${{ matrix.keymap }}
+          name: artifacts-${{ github.event.inputs.branch || github.ref_name }}-${{ matrix.keymap }}
           if-no-files-found: ignore
           path: |
             *.bin
             *.hex
             *.uf2
             .build/failed.*
-
-  pre-release:
-    name: Pre-Release
-    needs:
-      - branch_name
-      - ci_builds
-    runs-on: ubuntu-latest
-    permissions:
-      contents: "write"
-      packages: "write"
-      pull-requests: "read"
-
-    steps:
-      - name: Download files
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts-${{ needs.branch_name.outputs.value }}
-          merge-multiple: true
-
-      - name: Create Release
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ needs.branch_name.outputs.value }}
-          prerelease: true
-          title: "Latest from ${{ needs.branch_name.outputs.value }}"
-          files: artifacts-${{ needs.branch_name.outputs.value }}/**/*
