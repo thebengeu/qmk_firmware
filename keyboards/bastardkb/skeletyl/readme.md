@@ -11,12 +11,12 @@ A very small keyboard made for ergonomic enthusiasts.
 The template is:
 
 ```shell
-qmk compile -kb bastardkb/skeletyl/{VERSION}/elitec -km {KEYMAP}
+qmk compile -kb bastardkb/skeletyl -km {KEYMAP}
 ```
 
-| default                                            | via                                            |
-| -------------------------------------------------- | ---------------------------------------------- |
-| `qmk compile -kb bastardkb/skeletyl -km default`   | `qmk compile -kb bastardkb/skeletyl -km via`   |
+| default                                            |
+| -------------------------------------------------- |
+| `qmk compile -kb bastardkb/skeletyl -km default`   |
 
 This keyboard is made to be used with the Miryoku layout, do not use the default keymap.
 
