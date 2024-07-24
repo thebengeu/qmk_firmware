@@ -11,12 +11,12 @@ A modern, low-profile split ergonomic keyboard
 The template is:
 
 ```shell
-qmk compile -kb bastardkb/scylla/{VERSION}/elitec -km {KEYMAP}
+qmk compile -kb bastardkb/scylla -km {KEYMAP}
 ```
 
-| default                                             | via                                             |
-| --------------------------------------------------- | ----------------------------------------------- |
-| `qmk compile -kb bastardkb/scylla -km default`      | `qmk compile -kb bastardkb/scylla -km via`      |
+| default                                             |
+| --------------------------------------------------- |
+| `qmk compile -kb bastardkb/scylla -km default`      |
 
 See the [build environment setup](https://docs.qmk.fm/#/getting_started_build_tools) and the [make instructions](https://docs.qmk.fm/#/getting_started_make_guide) for more information. Brand new to QMK? Start with our [Complete Newbs Guide](https://docs.qmk.fm/#/newbs).
 
