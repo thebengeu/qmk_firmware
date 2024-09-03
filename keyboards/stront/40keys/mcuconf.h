@@ -3,5 +3,7 @@
 
 #pragma once
 
-bool is_display_enabled(void);
-bool is_display_side(void);
+#include_next <mcuconf.h>
+
+#undef RP_PWM_USE_PWM6
+#define RP_PWM_USE_PWM6 TRUE
