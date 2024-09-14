@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "quantum.h"
+#include "dilemma.h"
 
 #ifndef LAYER_INDICATOR_BRIGHTNESS_INC
 #    define LAYER_INDICATOR_BRIGHTNESS_INC 22
