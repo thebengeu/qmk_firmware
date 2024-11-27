@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "ploopyco.h"
 #include "analog.h"
 #include "opt_encoder.h"
@@ -128,6 +127,17 @@ void encoder_driver_task(void) {
 }
 #endif
 
+#ifndef PAVONIS
+void toggle_drag_scroll(void) {
+    is_drag_scroll ^= 1;
+}
+
+void cycle_dpi(void) {
+    keyboard_config.dpi_config = (keyboard_config.dpi_config + 1) % DPI_OPTION_SIZE;
+    eeconfig_update_kb(keyboard_config.raw);
+    pointing_device_set_cpi(dpi_array[keyboard_config.dpi_config]);
+}
+
 report_mouse_t pointing_device_task_kb(report_mouse_t mouse_report) {
     if (is_drag_scroll) {
         scroll_accumulated_h += (float)mouse_report.x / PLOOPY_DRAGSCROLL_DIVISOR_H;
@@ -174,9 +184,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t* record) {
     }
 
     if (keycode == DPI_CONFIG && record->event.pressed) {
-        keyboard_config.dpi_config = (keyboard_config.dpi_config + 1) % DPI_OPTION_SIZE;
-        eeconfig_update_kb(keyboard_config.raw);
-        pointing_device_set_cpi(dpi_array[keyboard_config.dpi_config]);
+        cycle_dpi();
     }
 
     if (keycode == DRAG_SCROLL) {
@@ -184,13 +192,14 @@ bool process_record_kb(uint16_t keycode, keyrecord_t* record) {
         is_drag_scroll = record->event.pressed;
 #else
         if (record->event.pressed) {
-            is_drag_scroll ^= 1;
+            toggle_drag_scroll();
         }
 #endif
     }
 
     return true;
 }
+#endif
 
 // Hardware Setup
 void keyboard_pre_init_kb(void) {
@@ -221,6 +230,7 @@ void keyboard_pre_init_kb(void) {
     keyboard_pre_init_user();
 }
 
+#ifndef PAVONIS
 void pointing_device_init_kb(void) {
     keyboard_config.raw = eeconfig_read_kb();
     if (keyboard_config.dpi_config > DPI_OPTION_SIZE) {
@@ -234,3 +244,4 @@ void eeconfig_init_kb(void) {
     eeconfig_update_kb(keyboard_config.raw);
     eeconfig_init_user();
 }
+#endif
