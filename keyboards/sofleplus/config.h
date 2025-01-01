@@ -51,13 +51,13 @@
     #if !defined(NO_PRINT) && !defined(CONSOLE_ENABLE)
     #define NO_PRINT
     #endif // !NO_PRINT
-	
+
 /* RP2040 boot setting */
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET // Activates the double-tap behavior
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET_TIMEOUT 200U // Timeout window in ms in which the double tap can occur.
 #define RP2040_BOOTLOADER_DOUBLE_TAP_RESET_LED GP17 // Specify a optional status led by GPIO number which blinks when entering the bootloader
 
-/* EEPROM Driver Configuration https://github.com/vial-kb/vial-gui/issues/158#issuecomment-1535447197*/	
+/* EEPROM Driver Configuration https://github.com/vial-kb/vial-gui/issues/158#issuecomment-1535447197*/
 #define WEAR_LEVELING_LOGICAL_SIZE 8192 //8192 is just an example
 #define WEAR_LEVELING_BACKING_SIZE 16384 // (WEAR_LEVELING_LOGICAL_SIZE * 2)
 //#define DYNAMIC_KEYMAP_EEPROM_MAX_ADDR   3996
@@ -66,17 +66,7 @@
 #define FORCE_NKRO
 #endif
 
-// Vial Support
-#define VIAL_KEYBOARD_UID {0x12, 0x38, 0x7D, 0x9C, 0x1C, 0x0E, 0x58, 0x43}
-
 #define SUPER_ALT_TAB_ENABLE	//Enable super alt tab custom keycode(+178).
-
-
-/* Maximum of combo, tap dance in vial */
-#define VIAL_TAP_DANCE_ENTRIES 32
-#define VIAL_COMBO_ENTRIES 32
-#define VIAL_KEY_OVERRIDE_ENTRIES 32
-#define VIAL_USER_ENTRIES 32
 
 #ifdef CAPS_WORD_ENABLE
 #define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
