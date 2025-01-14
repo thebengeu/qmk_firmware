@@ -54,10 +54,6 @@ extern keymap_config_t keymap_config;
 extern usb_endpoint_in_t  usb_endpoints_in[USB_ENDPOINT_IN_COUNT];
 extern usb_endpoint_out_t usb_endpoints_out[USB_ENDPOINT_OUT_COUNT];
 
-uint8_t _Alignas(2) keyboard_idle     = 0;
-uint8_t _Alignas(2) keyboard_protocol = 1;
-uint8_t keyboard_led_state            = 0;
-
 static bool __attribute__((__unused__)) send_report_buffered(usb_endpoint_in_lut_t endpoint, void *report, size_t size);
 static void __attribute__((__unused__)) flush_report_buffered(usb_endpoint_in_lut_t endpoint, bool padded);
 static bool __attribute__((__unused__)) receive_report(usb_endpoint_out_lut_t endpoint, void *report, size_t size);
@@ -84,7 +80,7 @@ static const USBDescriptor *usb_get_descriptor_cb(USBDriver *usbp, uint8_t dtype
 
     static USBDescriptor descriptor;
     descriptor.ud_string = NULL;
-    descriptor.ud_size   = get_usb_descriptor(setup->wValue.word, setup->wIndex, setup->wLength, (const void **const) & descriptor.ud_string);
+    descriptor.ud_size   = get_usb_descriptor(setup->wValue.word, setup->wIndex, setup->wLength, (const void **const)&descriptor.ud_string);
 
     if (descriptor.ud_string == NULL) {
         return NULL;
@@ -92,6 +88,10 @@ static const USBDescriptor *usb_get_descriptor_cb(USBDriver *usbp, uint8_t dtype
 
     return &descriptor;
 }
+
+#ifdef DIGITIZER_ENABLE
+extern bool digitizer_send_mouse_reports;
+#endif
 
 /* ---------------------------------------------------------
  *                  USB driver functions
@@ -168,6 +168,7 @@ void usb_event_queue_task(void) {
                 break;
             case USB_EVENT_RESET:
                 usb_device_state_set_reset();
+                usb_device_state_set_protocol(USB_PROTOCOL_REPORT);
                 break;
             default:
                 // Nothing to do, we don't handle it.
@@ -250,10 +251,10 @@ static void set_led_transfer_cb(USBDriver *usbp) {
     if (setup->wLength == 2) {
         uint8_t report_id = set_report_buf[0];
         if ((report_id == REPORT_ID_KEYBOARD) || (report_id == REPORT_ID_NKRO)) {
-            keyboard_led_state = set_report_buf[1];
+            usb_device_state_set_leds(set_report_buf[1]);
         }
     } else {
-        keyboard_led_state = set_report_buf[0];
+        usb_device_state_set_leds(set_report_buf[0]);
     }
 }
 
@@ -269,7 +270,9 @@ static bool usb_requests_hook_cb(USBDriver *usbp) {
                         return usb_get_report_cb(usbp);
                     case HID_REQ_GetProtocol:
                         if (setup->wIndex == KEYBOARD_INTERFACE) {
-                            usbSetupTransfer(usbp, &keyboard_protocol, sizeof(uint8_t), NULL);
+                            static uint8_t keyboard_protocol;
+                            keyboard_protocol = usb_device_state_get_protocol();
+                            usbSetupTransfer(usbp, &keyboard_protocol, sizeof(keyboard_protocol), NULL);
                             return true;
                         }
                         break;
@@ -286,18 +289,51 @@ static bool usb_requests_hook_cb(USBDriver *usbp) {
 #if defined(SHARED_EP_ENABLE) && !defined(KEYBOARD_SHARED_EP)
                             case SHARED_INTERFACE:
 #endif
+#ifdef DIGITIZER_ENABLE
+                                // Touchpad set feature reports - TODO: Relocate?
+                                if ((setup->wValue.hbyte == 0x3) && (setup->wValue.lbyte == REPORT_ID_DIGITIZER_CONFIGURATION)) {
+                                    // TODO: Disable the touchpad/buttons on demand from the host For now just ACK the message by
+                                    // sending back an empty packet with our report id.
+                                    usbSetupTransfer(usbp, &(setup->wValue.lbyte), 1, NULL);
+                                    return true;
+                                } else if ((setup->wValue.hbyte == 0x3) && (setup->wValue.lbyte == REPORT_ID_DIGITIZER_FUNCTION_SWITCH)) {
+                                    // TODO: Mode switching - Windows precision touchpads should start up reporting as a mouse, then switch
+                                    // to trackpad reports if we get asked. For now just ACK the message by sending back an empty packet
+                                    // with our report id.
+                                    // TODO: What size should this buffer be?
+                                    uint8_t buffer[128] = {};
+                                    usbReadSetup(usbp, DIGITIZER_IN_EPNUM, buffer);
+#if defined(POINTING_DEVICE_DRIVER_digitizer)
+                                    if (buffer[3] == 0x3) {
+                                        digitizer_send_mouse_reports = false;
+                                    }
+#endif
+                                    usbSetupTransfer(usbp, &(setup->wValue.lbyte), 1, NULL);
+                                    return true;
+                                } else if (setup->wValue.hbyte == 0x3 && setup->wValue.lbyte == REPORT_ID_DIGITIZER_GET_FEATURE) {
+                                    // TODO: do hosts ever call set on the touchpad feature?
+                                    // For now just ACK the message by sending back an empty packet with our report id.
+                                    usbSetupTransfer(usbp, &(setup->wValue.lbyte), 1, NULL);
+                                    return true;
+                                } else if ((setup->wValue.hbyte == 0x3) && (setup->wValue.lbyte == REPORT_ID_DIGITIZER)) {
+                                    uint8_t response[] = {REPORT_ID_DIGITIZER, 2};
+                                    usbSetupTransfer(usbp, response, 5, NULL);
+                                    return true;
+                                }
+#endif
+                                // LED handling stuff
                                 usbSetupTransfer(usbp, set_report_buf, sizeof(set_report_buf), set_led_transfer_cb);
                                 return true;
                         }
                         break;
                     case HID_REQ_SetProtocol:
                         if (setup->wIndex == KEYBOARD_INTERFACE) {
-                            keyboard_protocol = setup->wValue.word;
+                            usb_device_state_set_protocol(setup->wValue.lbyte);
                         }
                         usbSetupTransfer(usbp, NULL, 0, NULL);
                         return true;
                     case HID_REQ_SetIdle:
-                        keyboard_idle = setup->wValue.hbyte;
+                        usb_device_state_set_idle_rate(setup->wValue.hbyte);
                         return usb_set_idle_cb(usbp);
                 }
                 break;
@@ -326,18 +362,10 @@ static bool usb_requests_hook_cb(USBDriver *usbp) {
     return false;
 }
 
-static __attribute__((unused)) void dummy_cb(USBDriver *usbp) {
-    (void)usbp;
-}
-
 static const USBConfig usbcfg = {
     usb_event_cb,          /* USB events callback */
     usb_get_descriptor_cb, /* Device GET_DESCRIPTOR request callback */
     usb_requests_hook_cb,  /* Requests hook callback */
-#if STM32_USB_USE_OTG1 == TRUE || STM32_USB_USE_OTG2 == TRUE
-    dummy_cb, /* Workaround for OTG Peripherals not servicing new interrupts
-    after resuming from suspend. */
-#endif
 };
 
 void init_usb_driver(USBDriver *usbp) {
@@ -396,11 +424,6 @@ __attribute__((weak)) void restart_usb_driver(USBDriver *usbp) {
  * ---------------------------------------------------------
  */
 
-/* LED status */
-uint8_t keyboard_leds(void) {
-    return keyboard_led_state;
-}
-
 /**
  * @brief Send a report to the host, the report is enqueued into an output
  * queue and send once the USB endpoint becomes empty.
@@ -458,7 +481,7 @@ static bool receive_report(usb_endpoint_out_lut_t endpoint, void *report, size_t
 
 void send_keyboard(report_keyboard_t *report) {
     /* If we're in Boot Protocol, don't send any report ID or other funky fields */
-    if (!keyboard_protocol) {
+    if (usb_device_state_get_protocol() == USB_PROTOCOL_BOOT) {
         send_report(USB_ENDPOINT_IN_KEYBOARD, &report->mods, 8);
     } else {
         send_report(USB_ENDPOINT_IN_KEYBOARD, report, KEYBOARD_REPORT_SIZE);
@@ -508,6 +531,12 @@ void send_joystick(report_joystick_t *report) {
 void send_digitizer(report_digitizer_t *report) {
 #ifdef DIGITIZER_ENABLE
     send_report(USB_ENDPOINT_IN_DIGITIZER, report, sizeof(report_digitizer_t));
+#endif
+}
+
+void send_digitizer_stylus(report_digitizer_stylus_t *report) {
+#ifdef DIGITIZER_ENABLE
+    send_report(USB_ENDPOINT_IN_DIGITIZER, report, sizeof(report_digitizer_stylus_t));
 #endif
 }
 
