@@ -125,10 +125,6 @@ __attribute__((weak)) void spi_init(void) {
 }
 
 bool spi_start_extended(spi_start_config_t *start_config) {
-#if (SPI_USE_MUTUAL_EXCLUSION == TRUE)
-    spiAcquireBus(&SPI_DRIVER);
-#endif // (SPI_USE_MUTUAL_EXCLUSION == TRUE)
-
     if (spiStarted) {
         return false;
     }
@@ -451,8 +447,4 @@ void spi_stop(void) {
         spiStop(&SPI_DRIVER);
         spiStarted = false;
     }
-
-#if (SPI_USE_MUTUAL_EXCLUSION == TRUE)
-    spiReleaseBus(&SPI_DRIVER);
-#endif // (SPI_USE_MUTUAL_EXCLUSION == TRUE)
 }
