@@ -169,18 +169,12 @@ endif
 DIGITIZER_DRIVER ?= none
 VALID_DIGITIZER_DRIVER_TYPES := azoteq_iqs5xx maxtouch custom none
 ifeq ($(strip $(DIGITIZER_ENABLE)), yes)
-    ifeq ($(strip $(POINTING_DEVICE_ENABLE)), yes)
-        # Digitizers can fallback to reporting as a mouse if the host does not support a digitizer.
-        # If the mouse collection is in the same endpoint as the digitizer collection both Windows and
-        # Linux will assume it is a fallback collection and will ignore any events it produces. Moving
-        # it to its own endpoint ensures any mouse events we generate are processed.
-        MOUSE_SHARED_EP = no
-    endif
     ifeq ($(filter $(DIGITIZER_DRIVER),$(VALID_DIGITIZER_DRIVER_TYPES)),)
         $(call CATASTROPHIC_ERROR,Invalid DIGITIZER_DRIVER,DIGITIZER_DRIVER="$(DIGITIZER_DRIVER)" is not a valid digitizer device type)
     else
         OPT_DEFS += -DDIGITIZER_ENABLE
         SRC += $(QUANTUM_DIR)/digitizer.c
+        SRC += $(QUANTUM_DIR)/digitizer_mouse_fallback.c
         ifeq ($(filter $(strip $(DIGITIZER_DRIVER)),custom none),)
             SRC += drivers/sensors/$(strip $(DIGITIZER_DRIVER)).c
             OPT_DEFS += -DDIGITIZER_DRIVER_$(strip $(shell echo $(DIGITIZER_DRIVER) | tr '[:lower:]' '[:upper:]'))

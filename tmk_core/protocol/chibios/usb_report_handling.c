@@ -107,13 +107,13 @@ bool usb_get_report_cb(USBDriver *driver) {
     if (report_type == FEATURE_REPORT) {
 #ifdef DIGITIZER_ENABLE
         if (report_id == REPORT_ID_DIGITIZER_GET_FEATURE) {
-            static const digitizer_feat_t payload = {.report_id = REPORT_ID_DIGITIZER_GET_FEATURE, .contact_count_max = DIGITIZER_CONTACT_COUNT, .pad_type = 2, .surface_switch = 0};
+            static const digitizer_feat_t payload = {.report_id = REPORT_ID_DIGITIZER_GET_FEATURE, .contact_count_max = DIGITIZER_FINGER_COUNT, .pad_type = 2, .surface_switch = 0};
             usbSetupTransfer(driver, (uint8_t *)&payload, sizeof(digitizer_feat_t), NULL);
             return true;
         }
 
         if (report_id == REPORT_ID_DIGITIZER_CERTIFICATE) {
-            // This is required for touchpad support on Windows 8.1.
+            // This is required for touchpad support on Windows 8.1, on later windows versions we still need to report some 256 byte blob here.
             static const uint8_t cert[] __attribute__((aligned(4))) = { REPORT_ID_DIGITIZER_CERTIFICATE,
                                             0xfc, 0x28, 0xfe, 0x84, 0x40, 0xcb, 0x9a, 0x87, 0x0d, 0xbe, 0x57, 0x3c, 0xb6, 0x70, 0x09, 0x88, 0x07,
                                             0x97, 0x2d, 0x2b, 0xe3, 0x38, 0x34, 0xb6, 0x6c, 0xed, 0xb0, 0xf7, 0xe5, 0x9c, 0xf6, 0xc2, 0x2e, 0x84,
